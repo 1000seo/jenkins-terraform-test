@@ -14,6 +14,10 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
+    tools {
+        terraform 'terraform1.2.6'
+    }
+
 
     stages {
         stage('checkout') {

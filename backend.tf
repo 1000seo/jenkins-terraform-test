@@ -5,5 +5,6 @@ terraform {
     bucket = "jenkins-terraform-test-bucket"
     key    = "remote.tfstate"
     region = "ap-northeast-2"
+    profile ="personal"
   }
 }
