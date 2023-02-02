@@ -16,6 +16,7 @@ pipeline {
 
     tools {
         terraform 'terraform1.2.6'
+        git 'git'
     }
 
 
