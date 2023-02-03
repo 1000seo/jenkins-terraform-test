@@ -111,6 +111,7 @@ pipeline {
                 script {fail_stage = "${STAGE_NAME}"}
 
                 dir('terraform-code'){
+                    sh "terraform init"
                     sh "terraform destroy --auto-approve"
                 }
             }
