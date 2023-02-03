@@ -169,7 +169,7 @@ def formatSlackMsg(msgStr) {
         type: 'section',
         text: [
             type: 'plain_text',
-            text: "${PROJECT_NAME} - ${ENV_BRANCH} - ${currentBuild.number}"
+            text: "${currentBuild.number}"
         ]
     ]
     msgStr.split('\n').each {
