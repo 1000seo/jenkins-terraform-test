@@ -36,7 +36,7 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                fail_stage = "${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
 
                 sh 'ls -al'
                 sh 'cd /terraform-code'
@@ -56,7 +56,7 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                fail_stage = "${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
 
                 sh "terraform plan -input=false -out tfplan "
                 sh 'terraform show -no-color tfplan > tfplan.txt'
@@ -74,7 +74,7 @@ pipeline {
            }
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                fail_stage = "${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
 
                 script {
                     def plan = readFile 'tfplan.txt'
@@ -92,7 +92,7 @@ pipeline {
             }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                fail_stage = "${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
 
                 sh "terraform apply -input=false tfplan"
             }
@@ -104,7 +104,7 @@ pipeline {
             }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                fail_stage = "${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
 
                 sh "terraform destroy --auto-approve"
             }
