@@ -24,7 +24,8 @@ pipeline {
     stages {
         stage('checkout') {
             steps {
-                 script{
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                script{
                         dir("terraform")
                         {
                             git "${GIT_URL}"
@@ -41,6 +42,7 @@ pipeline {
             }
             
             steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 sh 'terraform init -input=false'
                 sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
             }
@@ -54,6 +56,7 @@ pipeline {
             }
             
             steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 sh "terraform plan -input=false -out tfplan "
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
@@ -69,7 +72,8 @@ pipeline {
                 }
            }
            steps {
-               script {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                script {
                     def plan = readFile 'tfplan.txt'
                     input message: "Do you want to apply the plan?",
                     parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
@@ -84,6 +88,7 @@ pipeline {
                 }
             }
             steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 sh "terraform apply -input=false tfplan"
             }
         }
@@ -93,7 +98,8 @@ pipeline {
                 equals expected: true, actual: params.destroy
             }
             steps {
-            sh "terraform destroy --auto-approve"
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                sh "terraform destroy --auto-approve"
             }
         }
 
