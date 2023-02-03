@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
+        //string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
         booleanParam(name: 'destroy', defaultValue: false, description: 'Destroy Terraform build?')
     }
@@ -39,8 +39,9 @@ pipeline {
                 script {fail_stage = "${STAGE_NAME}"}
 
                 sh 'ls -al'
-                sh "cd terraform-code"
-                sh 'pwd'
+                dir ('terraform-code'){
+                    sh 'pwd'
+                }
 
                 sh 'terraform init -input=false'
                 //sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
