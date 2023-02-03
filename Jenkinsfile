@@ -36,6 +36,8 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                fail_stage = "${STAGE_NAME}"
+
                 sh 'ls -al'
                 sh 'cd /terraform-code'
                 sh 'pwd'
@@ -54,6 +56,8 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                fail_stage = "${STAGE_NAME}"
+
                 sh "terraform plan -input=false -out tfplan "
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
@@ -70,6 +74,8 @@ pipeline {
            }
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                fail_stage = "${STAGE_NAME}"
+
                 script {
                     def plan = readFile 'tfplan.txt'
                     input message: "Do you want to apply the plan?",
@@ -86,6 +92,8 @@ pipeline {
             }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                fail_stage = "${STAGE_NAME}"
+
                 sh "terraform apply -input=false tfplan"
             }
         }
@@ -96,6 +104,8 @@ pipeline {
             }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                fail_stage = "${STAGE_NAME}"
+
                 sh "terraform destroy --auto-approve"
             }
         }
@@ -115,7 +125,7 @@ pipeline {
     post {
         failure {
             script {
-                msg = "${failedStage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                msg = "${fail_stage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
                 slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
                 slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
             }
