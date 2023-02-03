@@ -120,7 +120,7 @@ pipeline {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
-                    slackSend(channel: #jenkins, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    slackSend(channel: "#jenkins", blocks: formatSlackMsg(deploymentMessage), botUser: true)
                     //slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
                     
                 }
