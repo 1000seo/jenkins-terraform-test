@@ -44,7 +44,7 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 sh 'ls -al'
-                sh 'cd /terraform-code'
+                sh 'cd terraform-code/'
                 sh 'pwd'
 
                 sh 'terraform init -input=false'
