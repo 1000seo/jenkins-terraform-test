@@ -2,11 +2,9 @@ pipeline {
     agent any
 
     parameters {
-        //string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
         booleanParam(name: 'destroy', defaultValue: false, description: 'Destroy Terraform build?')
     }
-
 
      environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
@@ -37,15 +35,13 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {fail_stage = "${STAGE_NAME}"}
-
-                sh 'ls -al'
-                dir ('terraform-code'){
-                    sh 'pwd'
+                script {
+                    fail_stage = "${STAGE_NAME}"
+                    dir('terraform-code')
                 }
+                sh 'ls -al'
 
                 sh 'terraform init -input=false'
-                //sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
             }
         }
 
@@ -58,8 +54,11 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                script {
+                    fail_stage = "${STAGE_NAME}"
+                    dir('terraform-code')
+                }
                 sh 'pwd'
-                script {fail_stage = "${STAGE_NAME}"}
 
                 sh "terraform plan -input=false -out tfplan "
                 sh 'terraform show -no-color tfplan > tfplan.txt'
@@ -129,8 +128,8 @@ pipeline {
         failure {
             script {
                 msg = "${fail_stage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-                slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
-                slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
+                // slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
+                // slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
             }
         }
         always {
