@@ -23,9 +23,7 @@ pipeline {
         stage('checkout') {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script{
-                            git "${GIT_URL}"
-                    }
+                    checkout scm
                     sh 'git status'
                 }
             }
