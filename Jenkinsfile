@@ -57,6 +57,7 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                sh 'pwd'
                 script {fail_stage = "${STAGE_NAME}"}
 
                 sh "terraform plan -input=false -out tfplan "
