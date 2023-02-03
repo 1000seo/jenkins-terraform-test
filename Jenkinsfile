@@ -35,13 +35,12 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {
-                    fail_stage = "${STAGE_NAME}"
-                    dir('terraform-code'){}
+                script {fail_stage = "${STAGE_NAME}"}
+                dir('terraform-code'){
+                    sh 'ls -al'
+                    sh 'terraform init -input=false'
                 }
-                sh 'ls -al'
-
-                sh 'terraform init -input=false'
+                
             }
         }
 
@@ -54,14 +53,12 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {
-                    fail_stage = "${STAGE_NAME}"
-                    dir('terraform-code'){}
+                script {fail_stage = "${STAGE_NAME}"}
+                dir('terraform-code'){
+                    sh 'pwd'
+                    sh "terraform plan -input=false -out tfplan "
+                    sh 'terraform show -no-color tfplan > tfplan.txt'
                 }
-                sh 'pwd'
-
-                sh "terraform plan -input=false -out tfplan "
-                sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
 
@@ -77,13 +74,15 @@ pipeline {
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-
-                script {
-                    def plan = readFile 'tfplan.txt'
-                    input message: "Do you want to apply the plan?",
-                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-               }
-           }
+                
+                dir('terraform-code'){
+                    script {
+                        def plan = readFile 'tfplan.txt'
+                        input message: "Do you want to apply the plan?",
+                        parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                    }
+                }
+            }
         }
 
         stage('Apply') {
@@ -96,7 +95,9 @@ pipeline {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
 
-                sh "terraform apply -input=false tfplan"
+                dir('terraform-code'){
+                    sh "terraform apply -input=false tfplan"
+                }
             }
         }
 
@@ -108,7 +109,9 @@ pipeline {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
 
-                sh "terraform destroy --auto-approve"
+                dir('terraform-code'){
+                    sh "terraform destroy --auto-approve"
+                }
             }
         }
 
