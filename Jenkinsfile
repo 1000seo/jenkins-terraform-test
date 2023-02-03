@@ -11,8 +11,6 @@ pipeline {
      environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        //GIT_URL = 'https://github.com/1000seo/jenkins-terraform-test.git'
-        
     }
 
     tools {
@@ -26,10 +24,7 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script{
-                        dir("terraform")
-                        {
                             git "${GIT_URL}"
-                        }
                     }
                     sh 'git status'
                 }
@@ -48,7 +43,7 @@ pipeline {
                 sh 'pwd'
 
                 sh 'terraform init -input=false'
-                sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
+                //sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
             }
         }
 
