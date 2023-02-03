@@ -131,7 +131,7 @@ pipeline {
         failure {
             script {
                 msg = "${fail_stage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-                slackSend(channel: #jenkins, color: '#FF0000', message: msg)
+                slackSend(channel: "#jenkins", color: '#FF0000', message: msg)
                 // slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
             }
         }
