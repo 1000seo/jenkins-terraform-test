@@ -123,6 +123,7 @@ pipeline {
                     deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
                     slackSend(channel: "#jenkins", blocks: formatSlackMsg(deploymentMessage), botUser: true)
                     //slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    sh "echo ${GIT_HASH} > git_hash"
                     
                 }
             }
