@@ -27,6 +27,7 @@ pipeline {
                     sh 'git status'
                 }
             }
+            
         stage('Init') {
             when {
                 not {
