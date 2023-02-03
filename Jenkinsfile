@@ -37,7 +37,7 @@ pipeline {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
-                    dir('terraform-code')
+                    dir('terraform-code'){}
                 }
                 sh 'ls -al'
 
@@ -56,7 +56,7 @@ pipeline {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
-                    dir('terraform-code')
+                    dir('terraform-code'){}
                 }
                 sh 'pwd'
 
