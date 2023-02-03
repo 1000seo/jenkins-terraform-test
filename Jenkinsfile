@@ -12,6 +12,7 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         //GIT_URL = 'https://github.com/1000seo/jenkins-terraform-test.git'
+        
     }
 
     tools {
@@ -26,7 +27,7 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "GIT_URL"
+                            git "${GIT_URL}"
                         }
                     }
                     sh 'git status'
