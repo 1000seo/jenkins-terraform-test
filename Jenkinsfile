@@ -5,13 +5,13 @@ pipeline {
         string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
         booleanParam(name: 'destroy', defaultValue: false, description: 'Destroy Terraform build?')
-
     }
 
 
      environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        //GIT_URL = 'https://github.com/1000seo/jenkins-terraform-test.git'
     }
 
     tools {
@@ -26,13 +26,13 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/1000seo/jenkins-terraform-test.git"
+                            git "GIT_URL"
                         }
                     }
+                    sh 'git status'
                 }
             }
-
-        stage('Plan') {
+        stage('Init') {
             when {
                 not {
                     equals expected: true, actual: params.destroy
@@ -42,11 +42,22 @@ pipeline {
             steps {
                 sh 'terraform init -input=false'
                 sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
+            }
+        }
 
+        stage('Plan') {
+            when {
+                not {
+                    equals expected: true, actual: params.destroy
+                }
+            }
+            
+            steps {
                 sh "terraform plan -input=false -out tfplan "
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
+
         stage('Approval') {
            when {
                not {
@@ -56,10 +67,6 @@ pipeline {
                     equals expected: true, actual: params.destroy
                 }
            }
-           
-                
-            
-
            steps {
                script {
                     def plan = readFile 'tfplan.txt'
@@ -67,7 +74,7 @@ pipeline {
                     parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                }
            }
-       }
+        }
 
         stage('Apply') {
             when {
@@ -75,21 +82,83 @@ pipeline {
                     equals expected: true, actual: params.destroy
                 }
             }
-            
             steps {
                 sh "terraform apply -input=false tfplan"
             }
         }
-        
+
         stage('Destroy') {
             when {
                 equals expected: true, actual: params.destroy
             }
-        
-        steps {
-           sh "terraform destroy --auto-approve"
+            steps {
+            sh "terraform destroy --auto-approve"
+            }
+        }
+
+        stage('Send Slack Message') {
+            steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                script {
+                    fail_stage = "${STAGE_NAME}"
+                        slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                        slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    
+                }
+            }
         }
     }
+    post {
+        failure {
+            script {
+                msg = "${failedStage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
+                slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
 
-  }
+def getGitFormattedLog() {
+    return "git log --pretty=format:'<https://github.com/1000seo/${getRepoName()}/commit/%h|%h> ( *%<(8,trunc) %an* ) %s' ${gitHash}...${GIT_HASH} --date=format:'%Y-%m-%d %H:%m' | sed '/Merge /d'"
+}
+
+String getRepoName() {
+    return scm.getUserRemoteConfigs()[0].getUrl().tokenize('/').last().split("\\.")[0]
+}
+
+def formatSlackMsg(msgStr) {
+    def arr = []
+    arr << [
+        type: 'header',
+        text: [
+            type: 'plain_text',
+            text: '[Terraform] Apply Success'
+        ]
+    ]
+    arr << [
+        type: 'divider',
+    ]
+    arr << [
+        type: 'section',
+        text: [
+            type: 'plain_text',
+            text: "${PROJECT_NAME} - ${ENV_BRANCH} - ${currentBuild.number}"
+        ]
+    ]
+    msgStr.split('\n').each {
+        if (it.trim().length() > 0) {
+            arr << [
+                type: 'section',
+                text: [
+                    type: 'mrkdwn',
+                    text: it.trim()
+                ]
+            ]
+        }
+    }
+    return arr
 }
