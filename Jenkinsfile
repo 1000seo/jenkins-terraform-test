@@ -10,6 +10,12 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         GIT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        SLACK_DEPLOY_CHANNEL = "#jenkins"
+        SLACK_CHANNEL = "#jenkins"
+        // PROJECT_NAME =''
+        // ACCOUNT_ID =''
+        // ENV =''
+        
     }
 
     tools {
@@ -59,6 +65,7 @@ pipeline {
                     sh 'pwd'
                     sh "terraform plan -input=false -out tfplan "
                     sh 'terraform show -no-color tfplan > tfplan.txt'
+                    sh 'ls -al'
                 }
             }
         }
@@ -124,8 +131,8 @@ pipeline {
                     fail_stage = "${STAGE_NAME}"
                     gitHash = GIT_HASH
                     deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
-                    slackSend(channel: "#jenkins", blocks: formatSlackMsg(deploymentMessage), botUser: true)
-                    //slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
                     sh "echo ${GIT_HASH} > git_hash"
                     
                 }
@@ -136,8 +143,8 @@ pipeline {
         failure {
             script {
                 msg = "${fail_stage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-                slackSend(channel: "#jenkins", color: '#FF0000', message: msg)
-                // slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
+                slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
+                slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)
             }
         }
         always {
