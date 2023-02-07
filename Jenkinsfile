@@ -159,7 +159,7 @@ pipeline {
             steps {
                 dir("${DIR_PATH}"){
                     script {
-                        def data = readFile(file: 'output.txt')
+                        def data = readFile(file: 'tfoutput.txt')
                         println(data)
                     }
                 }
