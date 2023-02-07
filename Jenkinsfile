@@ -76,9 +76,8 @@ pipeline {
                 echo "========== Directory Path =========="
                 script {
                     fail_stage = "${STAGE_NAME}"
-                    //DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
+                    env.DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
                 }
-                env.DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
                 echo "DIR_PATH: ${DIR_PATH}"
                 }
             }
