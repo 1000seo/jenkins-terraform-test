@@ -151,20 +151,21 @@ pipeline {
                 dir("${DIR_PATH}"){
                     sh "terraform apply -input=false tfplan"
                     sh "terraform output > tfoutput.txt"
+                    sh "ls -al"
                 }
             }
         }
 
-        stage('Read Output') {
-            steps {
-                dir("${DIR_PATH}"){
-                    script {
-                        def data = readFile(file: 'tfoutput.txt')
-                        println(data)
-                    }
-                }
-            }
-        }
+        // stage('Read Output') {
+        //     steps {
+        //         dir("${DIR_PATH}"){
+        //             script {
+        //                 def data = readFile(file: 'tfoutput.txt')
+        //                 println(data)
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Destroy') {
             when {
