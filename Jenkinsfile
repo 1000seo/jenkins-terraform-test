@@ -157,9 +157,11 @@ pipeline {
 
         stage('Read Output') {
             steps {
-                script {
-                    def data = readFile(file: 'output.txt')
-                    println(data)
+                dir("${DIR_PATH}"){
+                    script {
+                        def data = readFile(file: 'output.txt')
+                        println(data)
+                    }
                 }
             }
         }
