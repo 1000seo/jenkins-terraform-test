@@ -76,11 +76,7 @@ pipeline {
                 echo "Service: ${SERVICE}"
                 
                 echo "========== Directory Path =========="
-                script{
-                    DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
-                    echo "DIR_PATH: ${DIR_PATH}" 
-                }
-
+                DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
                 echo "DIR_PATH: ${DIR_PATH}"
                 }
             }
