@@ -15,8 +15,6 @@ pipeline {
         // PROJECT_NAME =''
         // ACCOUNT_ID =''
         // ENV =''
-        DIR_PATH="${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/services/${SERVICE_TYPE}"
-        
     }
 
     tools {
@@ -76,7 +74,11 @@ pipeline {
                 echo "Service: ${SERVICE}"
                 
                 echo "========== Directory Path =========="
-                DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
+                script {
+                    fail_stage = "${STAGE_NAME}"
+                    //DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
+                }
+                env.DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
                 echo "DIR_PATH: ${DIR_PATH}"
                 }
             }
@@ -90,7 +92,7 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-                dir('terraform-code'){
+                dir("${DIR_PATH}"){
                     sh 'ls -al'
                     sh 'terraform init -input=false'
                 }
@@ -106,7 +108,7 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-                dir('terraform-code'){
+                dir("${DIR_PATH}"){
                     sh 'pwd'
                     sh "terraform plan -input=false -out tfplan "
                     sh 'terraform show -no-color tfplan > tfplan.txt'
@@ -127,7 +129,7 @@ pipeline {
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-                dir('terraform-code'){
+                dir("${DIR_PATH}"){
                     script {
                         def plan = readFile 'tfplan.txt'
                         input message: "Do you want to apply the plan?",
@@ -146,7 +148,7 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-                dir('terraform-code'){
+                dir("${DIR_PATH}"){
                     sh "terraform apply -input=false tfplan"
                 }
             }
@@ -159,7 +161,7 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-                dir('terraform-code'){
+                dir("${DIR_PATH}"){
                     sh "terraform init"
                     sh "terraform destroy --auto-approve"
                 }
