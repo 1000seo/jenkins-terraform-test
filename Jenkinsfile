@@ -26,13 +26,13 @@ pipeline {
 
 
     stages {
-        stage('Setup Directory Path') {
-            steps {
-                script {
-                    switch()
-                }
-            }
-        }
+        // stage('Setup Directory Path') {
+        //     steps {
+        //         script {
+        //             switch()
+        //         }
+        //     }
+        // }
 
         stage('Checkout') {
             steps {
