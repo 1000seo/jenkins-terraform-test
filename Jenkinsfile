@@ -26,19 +26,43 @@ pipeline {
 
 
     stages {
-        // stage('Setup Directory Path') {
-        //     steps {
-        //         script {
-        //             switch()
-        //         }
-        //     }
-        // }
+        stage('Setup Account ID') {
+            steps {
+                script {
+                    switch(PROJECT_NAME) {
+                        case "project" :
+                            if (ENV == 'dev' || ENV == 'qa') {
+                                env.AWS_ACCOUNT_ID = '1234' 
+                            }
+                            else {
+                                env.AWS_ACCOUNT = '5678'
+                            }
+                        break;
+                        case "energy-shares-us" :
+                        break;
+                        case "energy-shares-jp" :
+                        break;
+                    }
+                }
+            }
+        }
 
         stage('Checkout') {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                    checkout scm
-                    sh 'git status'
+                checkout scm
+                sh 'git status'
+                
+                echo "========== variables value check ========="
+                echo "Project name: ${PROJECT_NAME}"
+                echo "AWS Account ID: ${AWS_ACCOUNT_ID}"
+                echo "ENV: ${ENV}"
+                echo "Three tier: ${THREE_TIER}"
+                echo "Service: ${SERVICE}"
+                
+                echo "========== Directory Path =========="
+                echo "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
+
                 }
             }
             
