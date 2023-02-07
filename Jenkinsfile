@@ -15,6 +15,7 @@ pipeline {
         // PROJECT_NAME =''
         // ACCOUNT_ID =''
         // ENV =''
+        DIR_PATH="${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/services/${SERVICE_TYPE}"
         
     }
 
@@ -25,7 +26,15 @@ pipeline {
 
 
     stages {
-        stage('checkout') {
+        stage('Setup Directory Path') {
+            steps {
+                script {
+                    switch()
+                }
+            }
+        }
+
+        stage('Checkout') {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                     checkout scm
@@ -39,7 +48,6 @@ pipeline {
                     equals expected: true, actual: params.destroy
                 }
             }
-            
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
@@ -47,7 +55,6 @@ pipeline {
                     sh 'ls -al'
                     sh 'terraform init -input=false'
                 }
-                
             }
         }
 
@@ -57,7 +64,6 @@ pipeline {
                     equals expected: true, actual: params.destroy
                 }
             }
-            
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
@@ -82,7 +88,6 @@ pipeline {
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-                
                 dir('terraform-code'){
                     script {
                         def plan = readFile 'tfplan.txt'
@@ -102,7 +107,6 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-
                 dir('terraform-code'){
                     sh "terraform apply -input=false tfplan"
                 }
@@ -116,7 +120,6 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
-
                 dir('terraform-code'){
                     sh "terraform init"
                     sh "terraform destroy --auto-approve"
@@ -131,8 +134,8 @@ pipeline {
                     fail_stage = "${STAGE_NAME}"
                     gitHash = GIT_HASH
                     deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
-                    slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
-                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), message: msg)
+                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), message: msg)
                     sh "echo ${GIT_HASH} > git_hash"
                     
                 }
