@@ -28,14 +28,16 @@ pipeline {
     stages {
         stage('Setup Account ID') {
             steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
+                    fail_stage = "${STAGE_NAME}"
                     switch(PROJECT_NAME) {
                         case "project" :
                             if (ENV == 'dev' || ENV == 'qa') {
                                 env.AWS_ACCOUNT_ID = '1234' 
                             }
                             else {
-                                env.AWS_ACCOUNT = '5678'
+                                env.AWS_ACCOUNT_ID = '5678'
                             }
                         break;
                         case "energy-shares-us" :
@@ -50,6 +52,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
                 checkout scm
                 sh 'git status'
                 
