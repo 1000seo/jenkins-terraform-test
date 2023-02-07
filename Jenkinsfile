@@ -40,9 +40,21 @@ pipeline {
                                 env.AWS_ACCOUNT_ID = '5678'
                             }
                         break;
-                        case "energy-shares-us" :
+                        case "project2" :
+                            if (ENV == 'dev' || ENV == 'qa') {
+                                env.AWS_ACCOUNT_ID = '1234' 
+                            }
+                            else {
+                                env.AWS_ACCOUNT_ID = '5678'
+                            }
                         break;
-                        case "energy-shares-jp" :
+                        case "project3" :
+                            if (ENV == 'dev' || ENV == 'qa') {
+                                env.AWS_ACCOUNT_ID = '1234' 
+                            }
+                            else {
+                                env.AWS_ACCOUNT_ID = '5678'
+                            }
                         break;
                     }
                 }
@@ -64,8 +76,8 @@ pipeline {
                 echo "Service: ${SERVICE}"
                 
                 echo "========== Directory Path =========="
-                echo "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
-
+                env.DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
+                echo "${DIR_PATH}"
                 }
             }
             
