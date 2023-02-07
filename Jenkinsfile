@@ -146,7 +146,11 @@ pipeline {
             }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {fail_stage = "${STAGE_NAME}"}
+                script {
+                    fail_stage = "${STAGE_NAME}"
+                    slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
+                                message: "BUILD STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                    }
                 dir("${DIR_PATH}"){
                     sh "terraform apply -input=false tfplan"
                 }
@@ -174,8 +178,8 @@ pipeline {
                     fail_stage = "${STAGE_NAME}"
                     gitHash = GIT_HASH
                     deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
-                    slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), message: msg)
-                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), message: msg)
+                    slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
                     sh "echo ${GIT_HASH} > git_hash"
                     
                 }
