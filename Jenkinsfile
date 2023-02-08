@@ -116,15 +116,17 @@ pipeline {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
-                    slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
-                                message: ":white_check_mark: Terraform plan Completed Proceed Button Click!")
-                    }
+                    
+                    dir("${DIR_PATH}"){
+                        script {
+                            def plan = readFile 'tfplan.txt'
+                            def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
+                            input message: "Do you want to apply the plan?",
+                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
 
-                dir("${DIR_PATH}"){
-                    script {
-                        def plan = readFile 'tfplan.txt'
-                        input message: "Do you want to apply the plan?",
-                        parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                            slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
+                                message: ":white_check_mark: Terraform plan Completed!\n ${resource_number}")
+                        }    
                     }
                 }
             }
