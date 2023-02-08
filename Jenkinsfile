@@ -169,7 +169,7 @@ pipeline {
                     script {
                         def data = readFile(file: 'tfoutput.txt')
                         echo(data)
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "${data}")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "==Apply Output== ${data}")
                     }
                 }
             }
