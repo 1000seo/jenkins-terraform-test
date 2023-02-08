@@ -134,7 +134,7 @@ pipeline {
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark: Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n:link: (${env.BUILD_URL})")
+                                message: ":white_check_mark: Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n(${env.BUILD_URL})")
                     }
 
                 dir("${DIR_PATH}"){
@@ -153,7 +153,7 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script {
                         def data = readFile(file: 'tfoutput.txt')
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":round_pushpin: Terraform Apply Output \n ${data}")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":printer: Terraform Apply Output \n ${data}")
                     }
                 }
             }
@@ -167,7 +167,7 @@ pipeline {
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark: Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n:link:(${env.BUILD_URL})")
+                                message: ":white_check_mark: Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n(${env.BUILD_URL})")
                     }
 
                 dir("${DIR_PATH}"){
@@ -196,7 +196,7 @@ pipeline {
                     gitHash = GIT_HASH
                     deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
                     slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
-                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
+                    //slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
                 }
             }
         }
