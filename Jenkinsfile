@@ -118,18 +118,16 @@ pipeline {
                     fail_stage = "${STAGE_NAME}"
                     
                     dir("${DIR_PATH}"){
-                        script {
-                            def plan = readFile 'tfplan.txt'
-                            //def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
-                            sh "sed -n '/^Plan/p' tfplan.txt" > resource_number.txt
-                            def resource_number = readFile 'resource_number.txt'
-                            slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
-                                message: ":white_check_mark: Terraform plan Completed!\n ${resource_number}")
+                        def plan = readFile 'tfplan.txt'
+                        //def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
+                        sh "sed -n '/^Plan/p' tfplan.txt" > resource_number.txt
+                        def resource_number = readFile 'resource_number.txt'
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
+                            message: ":white_check_mark: Terraform plan Completed!\n ${resource_number}")
 
-                            input message: "Do you want to apply the plan?",
-                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-                        }    
-                    }
+                        input message: "Do you want to apply the plan?",
+                        parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                    }    
                 }
             }
         }
