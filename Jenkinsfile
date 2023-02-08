@@ -121,13 +121,13 @@ pipeline {
                         script {
                             def plan = readFile 'tfplan.txt'
                             def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
-                            input message: "Do you want to apply the plan?",
-                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-                            
                             sh 'echo(resource_number)'
-
+                            
                             slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
                                 message: ":white_check_mark: Terraform plan Completed!\n ${resource_number}")
+
+                            input message: "Do you want to apply the plan?",
+                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                         }    
                     }
                 }
