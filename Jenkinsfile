@@ -156,17 +156,18 @@ pipeline {
             }
         }
 
-        // stage('Read Output') {
-        //     steps {
-        //         dir("${DIR_PATH}"){
-        //             sh 'ls -al'
-        //             script {
-        //                 def data = readFile(file: 'tfoutput.txt')
-        //                 println(data)
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Read Output') {
+            steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                dir("${DIR_PATH}"){
+                    sh 'ls -al'
+                    script {
+                        def data = readFile(file: 'tfoutput.txt')
+                        echo(data)
+                    }
+                }
+            }
+        }
 
         stage('Destroy') {
             when {
