@@ -157,6 +157,11 @@ pipeline {
         }
 
         stage('Read Output') {
+             when {
+                not {
+                    equals expected: true, actual: params.destroy
+                }
+            }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 dir("${DIR_PATH}"){
@@ -164,6 +169,7 @@ pipeline {
                     script {
                         def data = readFile(file: 'tfoutput.txt')
                         echo(data)
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "echo(data)")
                     }
                 }
             }
