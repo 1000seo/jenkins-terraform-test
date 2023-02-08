@@ -229,7 +229,7 @@ def formatSlackMsg(msgStr) {
         type: 'header',
         text: [
             type: 'plain_text',
-            text: ':white_check_mark: Terraform Build Success'
+            text: 'Terraform Build Success:thumbsup:'
         ]
     ]
     arr << [
