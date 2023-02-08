@@ -114,7 +114,11 @@ pipeline {
 
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {fail_stage = "${STAGE_NAME}"}
+                script {
+                    fail_stage = "${STAGE_NAME}"
+                    slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
+                                message: ":white_check_mark: Terraform plan Completed Proceed Button Click!")
+                    }
 
                 dir("${DIR_PATH}"){
                     script {
