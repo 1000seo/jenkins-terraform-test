@@ -58,7 +58,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {fail_stage = "${STAGE_NAME}"}
                 checkout scm
                 sh 'git status'
                 
@@ -79,14 +78,11 @@ pipeline {
             }
             
         stage('Init') {
-            when {
-                not {
-                    equals expected: true, actual: params.destroy
-                }
-            }
+            when { not { equals expected: true, actual: params.destroy } }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
+
                 dir("${DIR_PATH}"){
                     sh 'ls -al'
                     sh 'terraform init -input=false'
@@ -95,14 +91,12 @@ pipeline {
         }
 
         stage('Plan') {
-            when {
-                not {
-                    equals expected: true, actual: params.destroy
-                }
-            }
+            when { not { equals expected: true, actual: params.destroy } }
+
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
+
                 dir("${DIR_PATH}"){
                     sh 'pwd'
                     sh "terraform plan -input=false -out tfplan "
@@ -114,16 +108,14 @@ pipeline {
 
         stage('Approval') {
            when {
-               not {
-                   equals expected: true, actual: params.autoApprove
-               }
-               not {
-                    equals expected: true, actual: params.destroy
-                }
-           }
+               not { equals expected: true, actual: params.autoApprove }
+               not { equals expected: true, actual: params.destroy }
+            }
+
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {fail_stage = "${STAGE_NAME}"}
+
                 dir("${DIR_PATH}"){
                     script {
                         def plan = readFile 'tfplan.txt'
@@ -136,13 +128,15 @@ pipeline {
 
         stage('Apply') {
             when { not { equals expected: true, actual: params.destroy } }
+
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark: Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n:link:(${env.BUILD_URL})")
+                                message: ":white_check_mark: Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n:link: (${env.BUILD_URL})")
                     }
+
                 dir("${DIR_PATH}"){
                     sh "terraform apply -input=false tfplan"
                     sh "terraform output > tfoutput.txt"
@@ -152,14 +146,14 @@ pipeline {
         }
 
         stage('Read Output') {
-             when { not { equals expected: true, actual: params.destroy } }
+            when { not { equals expected: true, actual: params.destroy } }
+
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 dir("${DIR_PATH}"){
                     script {
                         def data = readFile(file: 'tfoutput.txt')
-                        //slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":round_pushpin:Terraform Apply Output")
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":round_pushpin:Terraform Apply Output \n ${data}")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":round_pushpin: Terraform Apply Output \n ${data}")
                     }
                 }
             }
@@ -167,13 +161,15 @@ pipeline {
 
         stage('Destroy') {
             when { equals expected: true, actual: params.destroy }
+            
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark:Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n:link:(${env.BUILD_URL})")
+                                message: ":white_check_mark: Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n:link:(${env.BUILD_URL})")
                     }
+
                 dir("${DIR_PATH}"){
                     sh "terraform init"
                     sh "terraform destroy --auto-approve"
@@ -184,13 +180,23 @@ pipeline {
         stage('Send Slack Message') {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                // withAWS(credentials: "${AWS_CREDENTIALS}", region: "${AWS_DEPLOY_REGION}") {
+                //     script {
+                //         gitHash = GIT_HASH
+                //         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                //             gitHash = sh(returnStdout: true, script: "aws s3 cp --region ${AWS_DEPLOY_REGION} s3://${BUCKET_NAME}/${BUCKET_TYPE}/${SERVICE_NAME}/git_hash -").trim()
+                //         }
+                //         deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
+                //         sh "echo ${GIT_HASH} > git_hash"
+                //         sh "aws s3 cp --region ${AWS_DEPLOY_REGION} ./git_hash s3://${BUCKET_NAME}/${BUCKET_TYPE}/${SERVICE_NAME}/git_hash"
+                //     }
+                // }
                 script {
                     fail_stage = "${STAGE_NAME}"
                     gitHash = GIT_HASH
                     deploymentMessage = sh(returnStdout: true, script: getGitFormattedLog())
                     slackSend(channel: SLACK_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
-                    sh "echo ${GIT_HASH} > git_hash"
-                    
+                    slackSend(channel: SLACK_DEPLOY_CHANNEL, blocks: formatSlackMsg(deploymentMessage), botUser: true)
                 }
             }
         }
@@ -198,8 +204,9 @@ pipeline {
     post {
         failure {
             script {
-                msg = ":x:${fail_stage} Stage FAILED:x: \n: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                msg = ":x:Stage(${fail_stage}) FAILED:x: \n: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
                 slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
+                //slackSend(channel: SLACK_DEVOPS_CHANNEL, color: '#FF0000', message: msg)            
             }
         }
         always {
