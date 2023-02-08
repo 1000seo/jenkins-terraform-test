@@ -157,19 +157,16 @@ pipeline {
         }
 
         stage('Read Output') {
-             when {
-                not {
-                    equals expected: true, actual: params.destroy
-                }
-            }
+             when { not { equals expected: true, actual: params.destroy}}
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 dir("${DIR_PATH}"){
-                    sh 'ls -al'
+                    //sh 'ls -al'
                     script {
                         def data = readFile(file: 'tfoutput.txt')
-                        echo(data)
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "==Apply Output== ${data}")
+                        def title = "Apply Output:"
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":플로피_디스크: Apply Output")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "${data}")
                     }
                 }
             }
