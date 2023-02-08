@@ -114,10 +114,10 @@ pipeline {
 
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {
-                    fail_stage = "${STAGE_NAME}"
+                script {fail_stage = "${STAGE_NAME}"}
                     
-                    dir("${DIR_PATH}"){
+                dir("${DIR_PATH}"){
+                    script{
                         //def plan = readFile 'tfplan.txt'
                         //def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
                         sh "sed -n '/^Plan/p' tfplan.txt" > resource_number.txt
@@ -127,8 +127,8 @@ pipeline {
 
                         input message: "Do you want to apply the plan?",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-                    }    
-                }
+                    }
+                }    
             }
         }
 
