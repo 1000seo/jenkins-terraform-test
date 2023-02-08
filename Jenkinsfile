@@ -9,8 +9,8 @@ pipeline {
      environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        GIT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-        SLACK_DEPLOY_CHANNEL = "#jenkins"
+       // GIT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+       // SLACK_DEPLOY_CHANNEL = "#jenkins"
         SLACK_CHANNEL = "#jenkins"
     }
 
@@ -142,7 +142,7 @@ pipeline {
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":흰색_확인_표시:Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                                message: ":white_check_mark:Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' :link:(${env.BUILD_URL})")
                     }
                 dir("${DIR_PATH}"){
                     sh "terraform apply -input=false tfplan"
@@ -159,8 +159,8 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script {
                         def data = readFile(file: 'tfoutput.txt')
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":floppy_disk: Apply Output")
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "${data}")
+                        //slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":round_pushpin:Terraform Apply Output")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":round_pushpin:Terraform Apply Output ${data}")
                     }
                 }
             }
@@ -173,7 +173,7 @@ pipeline {
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: "Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                                message: ":white_check_mark:Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
                     }
                 dir("${DIR_PATH}"){
                     sh "terraform init"
@@ -199,7 +199,7 @@ pipeline {
     post {
         failure {
             script {
-                msg = "${fail_stage} FAILED: Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                msg = ":x:${fail_stage} Stage FAILED:x: : Job '${env.JOB_NAME} [${BUILD_TAG}/#${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
                 slackSend(channel: SLACK_CHANNEL, color: '#FF0000', message: msg)
             }
         }
@@ -223,7 +223,7 @@ def formatSlackMsg(msgStr) {
         type: 'header',
         text: [
             type: 'plain_text',
-            text: '[Terraform] Build Success'
+            text: ':white_check_mark:Terraform Build Success'
         ]
     ]
     arr << [
