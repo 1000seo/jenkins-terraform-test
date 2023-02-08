@@ -159,7 +159,7 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script {
                         def data = readFile(file: 'tfoutput.txt')
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":플로피_디스크: Apply Output")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":floppy_disk: Apply Output")
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "${data}")
                     }
                 }
