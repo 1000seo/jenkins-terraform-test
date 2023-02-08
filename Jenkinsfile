@@ -169,7 +169,7 @@ pipeline {
                     script {
                         def data = readFile(file: 'tfoutput.txt')
                         echo(data)
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "echo(data)")
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "${data}")
                     }
                 }
             }
@@ -234,7 +234,7 @@ def formatSlackMsg(msgStr) {
         type: 'header',
         text: [
             type: 'plain_text',
-            text: '[Terraform] Apply Success'
+            text: '[Terraform] Build Success'
         ]
     ]
     arr << [
@@ -244,7 +244,7 @@ def formatSlackMsg(msgStr) {
         type: 'section',
         text: [
             type: 'plain_text',
-            text: "${currentBuild.number}"
+            text: "{PROJECT_NAME} - $[ENV} - ${currentBuild.number}"
         ]
     ]
     msgStr.split('\n').each {
