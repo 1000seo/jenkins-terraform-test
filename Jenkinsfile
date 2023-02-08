@@ -136,17 +136,13 @@ pipeline {
         }
 
         stage('Apply') {
-            when {
-                not {
-                    equals expected: true, actual: params.destroy
-                }
-            }
+            when { not { equals expected: true, actual: params.destroy } }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
                     fail_stage = "${STAGE_NAME}"
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: "Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                                message: ":흰색_확인_표시:Apply STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
                     }
                 dir("${DIR_PATH}"){
                     sh "terraform apply -input=false tfplan"
@@ -157,14 +153,12 @@ pipeline {
         }
 
         stage('Read Output') {
-             when { not { equals expected: true, actual: params.destroy}}
+             when { not { equals expected: true, actual: params.destroy } }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 dir("${DIR_PATH}"){
-                    //sh 'ls -al'
                     script {
                         def data = readFile(file: 'tfoutput.txt')
-                        def title = "Apply Output:"
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: ":플로피_디스크: Apply Output")
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', message: "${data}")
                     }
@@ -173,9 +167,7 @@ pipeline {
         }
 
         stage('Destroy') {
-            when {
-                equals expected: true, actual: params.destroy
-            }
+            when { equals expected: true, actual: params.destroy }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 script {
