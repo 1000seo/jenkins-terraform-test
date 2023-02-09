@@ -118,7 +118,7 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script{
                         fail_stage = "${STAGE_NAME}"
-                        def plan = readFile(file: 'tfplan.txt')
+                        // = readFile(file: 'tfplan.txt')
 
                         sh "sed -n '/^Plan/p' tfplan.txt > apply_number.txt"
                         def apply_number = readFile(file: 'apply_number.txt')
