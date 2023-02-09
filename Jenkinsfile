@@ -118,6 +118,8 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script{
                         fail_stage = "${STAGE_NAME}"
+                        def plan = readFile(file: 'tfplan.txt')
+
                         sh "sed -n '/^Plan/p' tfplan.txt > resource_number.txt"
                         def resource_number = readFile(file: 'resource_number.txt')
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
