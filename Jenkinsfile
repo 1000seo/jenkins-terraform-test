@@ -177,7 +177,7 @@ pipeline {
                 //     }
                 dir("${DIR_PATH}"){
                     sh "terraform init"
-                    sh "terrraform plan -destroy -out=tfdestroy"
+                    sh "terraform plan -destroy -out=tfdestroy"
                     sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
                     script{
                         fail_stage = "${STAGE_NAME}"
