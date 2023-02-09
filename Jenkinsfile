@@ -114,14 +114,13 @@ pipeline {
 
            steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {fail_stage = "${STAGE_NAME}"}
                     
                 dir("${DIR_PATH}"){
                     script{
-                        //def plan = readFile 'tfplan.txt'
-                        //def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
-                        sh "sed -n '/^Plan/p' tfplan.txt" > resource_number.txt
-                        def resource_number = readFile(file: 'resource_number.txt')
+                        fail_stage = "${STAGE_NAME}"
+                        //sh "sed -n '/^Plan/p' tfplan.txt" > resource_number.txt
+                        //def resource_number = readFile(file: 'resource_number.txt')
+                        def resource_number = sh "sed -n '/^Plan/p' tfplan.txt"
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
                             message: ":white_check_mark: Terraform plan Completed!\n ${resource_number}")
 
