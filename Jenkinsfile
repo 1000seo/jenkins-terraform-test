@@ -179,13 +179,15 @@ pipeline {
                     sh "terraform init"
                     sh "terraform plan -destroy -out=tfdestroy"
                     sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
+                    sh 'ls -al'
+                    sh 'cat tfdestroy.txt'
+                    
                     script{
                         fail_stage = "${STAGE_NAME}"
                         sh "sed -n '/^Destroy/p' tfdestroy.txt > destroy_number.txt"
                         def destroy_number = readFile(file: 'destroy_number.txt')
-                        fail_stage = "${STAGE_NAME}"
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark: Destroy STARTED!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n ${destroy_number} \n(${env.BUILD_URL})")
+                                message: ":white_check_mark: Destroy STARTED!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n ${destroy_number} \n(${env.BUILD_URL})")
                     }
                     sh "terraform destroy --auto-approve"
                 }
