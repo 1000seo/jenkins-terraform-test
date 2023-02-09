@@ -120,10 +120,10 @@ pipeline {
                         fail_stage = "${STAGE_NAME}"
                         def plan = readFile(file: 'tfplan.txt')
 
-                        sh "sed -n '/^Plan/p' tfplan.txt > resource_number.txt"
-                        def resource_number = readFile(file: 'resource_number.txt')
+                        sh "sed -n '/^Plan/p' tfplan.txt > apply_number.txt"
+                        def apply_number = readFile(file: 'apply_number.txt')
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
-                            message: ":white_check_mark: Terraform plan Completed!\n ${resource_number}")
+                            message: ":white_check_mark: Terraform plan Completed!\n ${apply_number}")
 
                         input message: "Do you want to apply the plan?",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
@@ -170,14 +170,23 @@ pipeline {
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {
-                    fail_stage = "${STAGE_NAME}"
-                    slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark: Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n(${env.BUILD_URL})")
-                    }
-
+                // script {
+                //     fail_stage = "${STAGE_NAME}"
+                //     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
+                //                 message: ":white_check_mark: Destroy STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n(${env.BUILD_URL})")
+                //     }
                 dir("${DIR_PATH}"){
                     sh "terraform init"
+                    sh "terrraform plan -destroy -out=tfdestroy"
+                    sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
+                    script{
+                        fail_stage = "${STAGE_NAME}"
+                        sh "sed -n '/^Destroy/p' tfdestroy.txt > destroy_number.txt"
+                        def destroy_number = readFile(file: 'destroy_number.txt')
+                        fail_stage = "${STAGE_NAME}"
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
+                                message: ":white_check_mark: Destroy STARTED!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' \n ${destroy_number} \n(${env.BUILD_URL})")
+                    }
                     sh "terraform destroy --auto-approve"
                 }
             }
