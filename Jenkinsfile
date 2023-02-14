@@ -29,7 +29,7 @@ pipeline {
         stage('AWS update check') {
             steps {
                 script {
-                    MASTER_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short origin/master').trim()
+                    MASTER_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short origin/TF-v1').trim()
                     WORK_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     sh "git show ${MASTER_BRANCH_HASH}...${WORK_BRANCH_HASH} --name-only --pretty='%n' > update.txt"
                     sh 'ls -al'
@@ -122,7 +122,7 @@ pipeline {
                         def plan = readFile(file: "${TF_PLAN}.txt")
 
                         sh "sed -n '/^Plan/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
-                        def apply = readFile(file: 'TF_APPLY_RESOURCE.txt')
+                        def apply = readFile(file: "${TF_APPLY_RESOURCE}.txt")
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
                             message: ":white_check_mark: Terraform plan Completed!\n :pushpin: Apply ${apply}")
 
