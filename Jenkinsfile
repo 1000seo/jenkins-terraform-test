@@ -32,7 +32,7 @@ pipeline {
                     MASTER_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short origin/master').trim()
                     WORK_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     sh "git show ${MASTER_BRANCH_HASH}...${WORK_BRANCH_HASH} --name-only --pretty='%n' > update.txt"
-                    echo 'ls -al'
+                    sh 'ls -al'
 
                     def update = readFile(file: "update.txt")
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
@@ -54,7 +54,7 @@ pipeline {
                     }
                     else {
                         dir("${GIT_REPO}"){
-                            sh 'git pull origin master'
+                            sh 'git pull origin TF-v2'
                         }
                     }
                 }
