@@ -3,6 +3,7 @@ pipeline {
 
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+        //배포할 땐 destroy 주석처리하기
         booleanParam(name: 'destroy', defaultValue: false, description: 'Destroy Terraform build?')
     }
 
@@ -10,7 +11,10 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         GIT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-        ENV = "${ENV.toLowerCase()}"
+        PROJECT_ENV = "${PROJECT_ENV.toLowerCase()}"
+        TF_PLAN = 'tfplan'
+        TF_APPLY_RESOURCE = 'apply_number'
+        GIT_REPO = 'infrastructure-aws-terraform'
         SLACK_CHANNEL = "#jenkins"
     }
 
@@ -21,72 +25,60 @@ pipeline {
 
 
     stages {
-        stage('Setup Account ID') {
+        stage('AWS update check') {
             steps {
-                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+
+
+            }
+        }
+
+
+        stage('Git Clone & Update') {
+            steps {
+                checkout scm
+                sh 'git status'
+
                 script {
                     fail_stage = "${STAGE_NAME}"
-                    switch(PROJECT_NAME) {
-                        case "project" :
-                            if (ENV == 'dev' || ENV == 'qa') {
-                                env.AWS_ACCOUNT_ID = '1234' 
-                            }
-                            else {
-                                env.AWS_ACCOUNT_ID = '5678'
-                            }
-                        break;
-                        case "project2" :
-                            if (ENV == 'dev' || ENV == 'qa') {
-                                env.AWS_ACCOUNT_ID = '1234' 
-                            }
-                            else {
-                                env.AWS_ACCOUNT_ID = '5678'
-                            }
-                        break;
-                        case "project3" :
-                            if (ENV == 'dev' || ENV == 'qa') {
-                                env.AWS_ACCOUNT_ID = '1234' 
-                            }
-                            else {
-                                env.AWS_ACCOUNT_ID = '5678'
-                            }
-                        break;
+
+                    if (env.BUILD_NUMBER == 1) {
+                        sh "git clone ${GIT_URL}"
+                    }
+                    else {
+                        dir("${GIT_REPO}"){
+                            sh 'git pull'
+                        }
                     }
                 }
             }
         }
 
-        stage('Checkout') {
+        stage('Setup Dirctory Path') {
             steps {
-                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                checkout scm
-                sh 'git status'
-                
-                echo "========== Variables Value Check ========="
-                echo "Project name: ${PROJECT_NAME}"
-                echo "AWS Account ID: ${AWS_ACCOUNT_ID}"
-                echo "ENV: ${ENV}"
-                echo "Three tier: ${THREE_TIER}"
-                echo "Service: ${SERVICE}"
-                
-                echo "========== Directory Path =========="
                 script {
+                    echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                     fail_stage = "${STAGE_NAME}"
-                    env.DIR_PATH = "${PROJECT_NAME}/${AWS_ACCOUNT_ID}/${ENV}/${THREE_TIER}/${SERVICE}"
-                }
-                echo "DIR_PATH: ${DIR_PATH}"
+
+                    env.DIR_PATH = input (
+                        message: "Enter the Path with Terraform apply",
+                        parameters: [string(name: 'DIR_PATH', description: 'Please review the plan', defaultValue: 'Directory path value')]
+                    )
                 }
             }
+        }
             
         stage('Init') {
             when { not { equals expected: true, actual: params.destroy } }
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
-                script {fail_stage = "${STAGE_NAME}"}
 
                 dir("${DIR_PATH}"){
-                    sh 'ls -al'
-                    sh 'terraform init -input=false'
+                    script {
+                        fail_stage = "${STAGE_NAME}"
+
+                        sh 'ls -al'
+                        sh 'terraform init -input=false'
+                    }
                 }
             }
         }
@@ -100,14 +92,14 @@ pipeline {
 
                 dir("${DIR_PATH}"){
                     sh 'pwd'
-                    sh "terraform plan -input=false -out tfplan "
-                    sh 'terraform show -no-color tfplan > tfplan.txt'
+                    sh "terraform plan -input=false -out ${TF_PLAN}"
+                    sh 'terraform show -no-color ${TF_PLAN} > ${TF_PLAN}.txt'
                     sh 'ls -al'
                 }
             }
         }
 
-        stage('Approval') {
+        stage('Apply Approval') {
            when {
                not { equals expected: true, actual: params.autoApprove }
                not { equals expected: true, actual: params.destroy }
@@ -119,9 +111,9 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script{
                         fail_stage = "${STAGE_NAME}"
-                        def plan = readFile(file: 'tfplan.txt')
+                        def plan = readFile(file: '${TF_PLAN}.txt')
 
-                        sh "sed -n '/^Plan/p' tfplan.txt > apply_number.txt"
+                        sh "sed -n '/^Plan/p' ${TF_PLAN}.txt > apply_number.txt"
                         def apply_number = readFile(file: 'apply_number.txt')
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
                             message: ":white_check_mark: Terraform plan Completed!\n :pushpin: Apply ${apply_number}")
@@ -145,14 +137,14 @@ pipeline {
                     }
 
                 dir("${DIR_PATH}"){
-                    sh "terraform apply -input=false tfplan"
+                    sh "terraform apply -input=false ${TF_PLAN}"
                     sh "terraform output > tfoutput.txt"
                     sh "ls -al"
                 }
             }
         }
 
-        stage('Read Output') {
+        stage('Apply Resource Output') {
             when { not { equals expected: true, actual: params.destroy } }
 
             steps {
@@ -166,24 +158,52 @@ pipeline {
             }
         }
 
+        stage('Destroy Approval') {
+           when { equals expected: true, actual: params.destroy }
+
+           steps {
+                echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
+                    
+                dir("${DIR_PATH}"){
+                    script{
+                        fail_stage = "${STAGE_NAME}"
+
+                        sh "terraform init"
+                        sh "terraform plan -destroy -out=tfdestroy"
+                        sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
+                        sh 'ls -al'
+
+                        sh "sed -n '/^Plan/p' tfdestroy.txt > destroy_number.txt"
+                        def destroy_number = readFile(file: 'destroy_number.txt')
+                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
+                                message: ":white_check_mark: Destroy Resource Check!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n :pushpin: Destroy ${destroy_number}\n(${env.BUILD_URL})")
+                        
+                        def destroy = readfile(file: 'tfdestroy.txt')
+                        input message: "Do you want to apply the plan?",
+                        parameters: [text(name: 'Plan', description: 'Please review the destroy', defaultValue: destroy)]
+                    }
+                }    
+            }
+        }
+
         stage('Destroy') {
             when { equals expected: true, actual: params.destroy }
             
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 dir("${DIR_PATH}"){
-                    sh "terraform init"
-                    sh "terraform plan -destroy -out=tfdestroy"
-                    sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
-                    sh 'ls -al'
+                    // sh "terraform init"
+                    // sh "terraform plan -destroy -out=tfdestroy"
+                    // sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
+                    // sh 'ls -al'
 
-                    script{
-                        fail_stage = "${STAGE_NAME}"
-                        sh "sed -n '/^Plan/p' tfdestroy.txt > destroy_number.txt"
-                        def destroy_number = readFile(file: 'destroy_number.txt')
-                        slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                                message: ":white_check_mark: Destroy STARTED!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n :pushpin: Destroy ${destroy_number}\n(${env.BUILD_URL})")
-                    }
+                    // script{
+                    //     fail_stage = "${STAGE_NAME}"
+                    //     sh "sed -n '/^Plan/p' tfdestroy.txt > destroy_number.txt"
+                    //     def destroy_number = readFile(file: 'destroy_number.txt')
+                    //     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
+                    //             message: ":white_check_mark: Destroy STARTED!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n :pushpin: Destroy ${destroy_number}\n(${env.BUILD_URL})")
+                    // }
                     sh "terraform destroy --auto-approve"
                 }
             }
