@@ -37,7 +37,6 @@ pipeline {
                     def update = readFile(file: "update.txt")
                     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
                             message: ":white_check_mark: Git Repogitory update Directory!\n :pushpin: update file ${update}")
-
                 }
             }
         }
