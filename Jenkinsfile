@@ -15,6 +15,8 @@ pipeline {
         TF_PLAN = 'tfplan'
         TF_APPLY_RESOURCE = 'apply_number'
         GIT_REPO = 'infrastructure-aws-terraform'
+        GIT_URL = "https://github.com/1000seo/jenkins-terraform-test.git"
+        GIT_REPO = "jenkins-terraform-test"
         SLACK_CHANNEL = "#jenkins"
         
     }
@@ -29,8 +31,8 @@ pipeline {
         stage('AWS update check') {
             steps {
                 script {
-                    MASTER_LAST_HASH = sh(returnStdout: true, script: 'git rev-parse origin/master').trim()
-                    RECENT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+                    MASTER_LAST_HASH = sh(returnStdout: true, script: 'git rev-parse --short origin/master').trim()
+                    RECENT_HASH = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     echo "git show ${MASTER_LAST_HASH}...${RECENT_HASH} --name-only --pretty='%n'"
                 }
             }
