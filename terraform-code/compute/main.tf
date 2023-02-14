@@ -21,6 +21,8 @@ resource "aws_instance" "web" {
   key_name               = "aws_seoul_key"
   instance_type          = var.web_instance_type
   vpc_security_group_ids = [var.web_sg]
+  availability_zone      = "ap-northeast-2a"
+  subnet_id              = var.public_subnet
   user_data              = filebase64("install_apache.sh")
 
   tags = {
