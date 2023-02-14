@@ -16,7 +16,6 @@ pipeline {
         GIT_URL = "https://github.com/1000seo/jenkins-terraform-test.git"
         GIT_REPO = "jenkins-terraform-test"
         SLACK_CHANNEL = "#jenkins"
-        
     }
 
     tools {
@@ -202,18 +201,6 @@ pipeline {
             steps {
                 echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
                 dir("${DIR_PATH}"){
-                    // sh "terraform init"
-                    // sh "terraform plan -destroy -out=tfdestroy"
-                    // sh 'terraform show -no-color tfdestroy > tfdestroy.txt'
-                    // sh 'ls -al'
-
-                    // script{
-                    //     fail_stage = "${STAGE_NAME}"
-                    //     sh "sed -n '/^Plan/p' tfdestroy.txt > destroy_number.txt"
-                    //     def destroy_number = readFile(file: 'destroy_number.txt')
-                    //     slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
-                    //             message: ":white_check_mark: Destroy STARTED!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n :pushpin: Destroy ${destroy_number}\n(${env.BUILD_URL})")
-                    // }
                     sh "terraform destroy --auto-approve"
                 }
             }
