@@ -16,20 +16,20 @@ resource "aws_vpc" "vpc" {
 }
 
 resource "aws_subnet" "public_subnet" {
-  count                   = length(var.public_cidrs)
+  //count                   = length(var.public_cidrs)
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.public_cidrs[count.index]
+  cidr_block              = var.public_cidrs
   map_public_ip_on_launch = true
-  availability_zone       = ["ap-northeast-2a", "ap-northeast-2b"][count.index]
+  availability_zone       = "ap-northeast-2a"
 
   tags = {
-    Name = "public_${count.index + 1}"
+    Name = "public_subnet"
   }
 }
 
 resource "aws_route_table_association" "public_assoc" {
-  count          = length(var.public_cidrs)
-  subnet_id      = aws_subnet.public_subnet.*.id[count.index]
+  //count          = length(var.public_cidrs)
+  subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_rt.id
 }
 
@@ -48,7 +48,7 @@ resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "public"
+    Name = "public_rtb"
   }
 }
 
