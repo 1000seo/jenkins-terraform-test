@@ -16,9 +16,9 @@ data "aws_ami" "linux" {
   owners = ["amazon"]
 }
 
-resource "aws_launch_template" "web" {
-  name_prefix            = "web"
-  image_id               = data.aws_ami.linux.id
+resource "aws_instance" "web" {
+  ami                    = data.aws_ami.linux.id
+  key_name               = "aws_seoul_key"
   instance_type          = var.web_instance_type
   vpc_security_group_ids = [var.web_sg]
   user_data              = filebase64("install_apache.sh")
