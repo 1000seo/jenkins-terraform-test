@@ -190,7 +190,7 @@ pipeline {
                         
                         def destroy = readFile(file: 'tfdestroy.txt')
                         input message: "Do you want to destroy?",
-                        parameters: [text(name: 'Destroy', description: 'Please review the destroy', defaultValue: destroy)]
+                        parameters: [text(name: 'Destroy', description: 'Resource Destroy', defaultValue: destroy)]
                     }
                 }    
             }
