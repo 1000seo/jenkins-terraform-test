@@ -14,7 +14,6 @@ pipeline {
        //PROJECT_ENV = "${PROJECT_ENV.toLowerCase()}"
         TF_PLAN = 'tfplan'
         TF_APPLY_RESOURCE = 'apply_number'
-        GIT_REPO = 'infrastructure-aws-terraform'
         GIT_URL = "https://github.com/1000seo/jenkins-terraform-test.git"
         GIT_REPO = "jenkins-terraform-test"
         SLACK_CHANNEL = "#jenkins"
