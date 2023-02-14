@@ -281,7 +281,7 @@ def formatSlackMsg(msgStr) {
         type: 'section',
         text: [
             type: 'plain_text',
-            text: "${PROJECT_NAME} - ${BUILD_TAG} - ${currentBuild.number}"
+            text: "${BUILD_TAG} - ${currentBuild.number}"
         ]
     ]
     msgStr.split('\n').each {
