@@ -1,0 +1,12 @@
+  # module.compute.aws_launch_template.web will be created
+  # module.networking.aws_internet_gateway.internet_gateway will be created
+  # module.networking.aws_route.default_public_route will be created
+  # module.networking.aws_route_table.public_rt will be created
+  # module.networking.aws_route_table_association.public_assoc[0] will be created
+  # module.networking.aws_route_table_association.public_assoc[1] will be created
+  # module.networking.aws_security_group.web_sg will be created
+  # module.networking.aws_subnet.public_subnet[0] will be created
+  # module.networking.aws_subnet.public_subnet[1] will be created
+  # module.networking.aws_vpc.vpc will be created
+  # module.networking.random_integer.random will be created
+Plan: 11 to add, 0 to change, 0 to destroy.

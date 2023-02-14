@@ -121,10 +121,12 @@ pipeline {
                         fail_stage = "${STAGE_NAME}"
                         def plan = readFile(file: "${TF_PLAN}.txt")
 
-                        sh "sed -n '/^Plan/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
+                        sh "sed -n '/created/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
+                        sh "sed -n '/destroyed/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
+                        sh "sed -n '/^Plan/p' ${TF_PLAN}.txt >> ${TF_APPLY_RESOURCE}.txt"
                         def apply = readFile(file: "${TF_APPLY_RESOURCE}.txt")
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
-                            message: ":white_check_mark: Terraform plan Completed!\n :pushpin: Apply ${apply}")
+                            message: ":white_check_mark: Terraform plan Completed!\n :pushpin: Apply Resource \n${apply}")
 
                         input message: "Do you want to apply the plan?",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
