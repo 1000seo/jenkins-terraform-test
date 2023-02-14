@@ -184,11 +184,11 @@ pipeline {
                         sh 'ls -al'
 
                         sh "sed -n '/^Plan/p' tfdestroy.txt > destroy_number.txt"
-                        def destroy = readFile(file: 'destroy_number.txt')
+                        def destroy_number = readFile(file: 'destroy_number.txt')
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
                                 message: ":white_check_mark: Destroy Resource Check!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n :pushpin: Destroy ${destroy_number}\n(${env.BUILD_URL})")
                         
-                        //def destroy = readfile(file: 'tfdestroy.txt')
+                        def destroy = readfile(file: 'tfdestroy.txt')
                         input message: "Do you want to destroy?",
                         parameters: [text(name: 'Destroy', description: 'Please review the destroy', defaultValue: destroy)]
                     }
