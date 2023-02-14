@@ -188,7 +188,7 @@ pipeline {
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true,
                                 message: ":white_check_mark: Destroy Resource Check!: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]'\n :pushpin: Destroy ${destroy_number}\n(${env.BUILD_URL})")
                         
-                        def destroy = readfile(file: 'tfdestroy.txt')
+                        def destroy = readFile(file: 'tfdestroy.txt')
                         input message: "Do you want to destroy?",
                         parameters: [text(name: 'Destroy', description: 'Please review the destroy', defaultValue: destroy)]
                     }
