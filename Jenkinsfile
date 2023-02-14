@@ -16,6 +16,8 @@ pipeline {
         TF_APPLY_RESOURCE = 'apply_number'
         GIT_REPO = 'infrastructure-aws-terraform'
         SLACK_CHANNEL = "#jenkins"
+        MASTER_LAST_HASH = sh(returnStdout: true, script: 'git rev-parse --short master').trim()
+        RECENT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     }
 
     tools {
@@ -27,8 +29,9 @@ pipeline {
     stages {
         stage('AWS update check') {
             steps {
-
-
+                script {
+                    echo "git show ${MASTER_LAST_HASH}...${RECENT_HASH} --name-only --pretty='%n'"
+                }
             }
         }
 
