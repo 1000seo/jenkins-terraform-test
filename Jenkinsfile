@@ -11,9 +11,8 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         GIT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-       //PROJECT_ENV = "${PROJECT_ENV.toLowerCase()}"
         TF_PLAN = 'tfplan'
-        TF_APPLY_RESOURCE = 'apply_number'
+        TF_APPLY_RESOURCE = 'tfapply'
         GIT_URL = "https://github.com/1000seo/jenkins-terraform-test.git"
         GIT_REPO = "jenkins-terraform-test"
         SLACK_CHANNEL = "#jenkins"
@@ -30,13 +29,18 @@ pipeline {
         stage('AWS update check') {
             steps {
                 script {
-                    MASTER_LAST_HASH = sh(returnStdout: true, script: 'git rev-parse --short origin/master').trim()
-                    RECENT_HASH = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
-                    echo "git show ${MASTER_LAST_HASH}...${RECENT_HASH} --name-only --pretty='%n'"
+                    MASTER_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short origin/master').trim()
+                    WORK_BRANCH_HASH = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+                    sh "git show ${MASTER_BRANCH_HASH}...${WORK_BRANCH_HASH} --name-only --pretty='%n' > update.txt"
+                    echo 'ls -al'
+
+                    def update = readFile(file: "update.txt")
+                    slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
+                            message: ":white_check_mark: Git Repogitory update Directory!\n :pushpin: update file ${update}")
+
                 }
             }
         }
-
 
         stage('Git Clone & Update') {
             steps {
@@ -116,12 +120,12 @@ pipeline {
                 dir("${DIR_PATH}"){
                     script{
                         fail_stage = "${STAGE_NAME}"
-                        def plan = readFile(file: '${TF_PLAN}.txt')
+                        def plan = readFile(file: "${TF_PLAN}.txt")
 
-                        sh "sed -n '/^Plan/p' ${TF_PLAN}.txt > apply_number.txt"
-                        def apply_number = readFile(file: 'apply_number.txt')
+                        sh "sed -n '/^Plan/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
+                        def apply = readFile(file: 'TF_APPLY_RESOURCE.txt')
                         slackSend(channel: SLACK_CHANNEL, color: '#00FF00', botUser: true, 
-                            message: ":white_check_mark: Terraform plan Completed!\n :pushpin: Apply ${apply_number}")
+                            message: ":white_check_mark: Terraform plan Completed!\n :pushpin: Apply ${apply}")
 
                         input message: "Do you want to apply the plan?",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
