@@ -11,7 +11,7 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         GIT_HASH = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-        PROJECT_ENV = "${PROJECT_ENV.toLowerCase()}"
+       //PROJECT_ENV = "${PROJECT_ENV.toLowerCase()}"
         TF_PLAN = 'tfplan'
         TF_APPLY_RESOURCE = 'apply_number'
         GIT_REPO = 'infrastructure-aws-terraform'
