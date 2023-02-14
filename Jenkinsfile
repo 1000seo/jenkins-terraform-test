@@ -51,7 +51,7 @@ pipeline {
                     }
                     else {
                         dir("${GIT_REPO}"){
-                            sh 'git pull'
+                            sh 'git pull origin master'
                         }
                     }
                 }
