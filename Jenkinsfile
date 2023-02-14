@@ -121,6 +121,7 @@ pipeline {
                         def plan = readFile(file: "${TF_PLAN}.txt")
 
                         sh "sed -n '/created/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
+                        sh "sed -n '/update/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
                         sh "sed -n '/destroyed/p' ${TF_PLAN}.txt >> ${TF_APPLY_RESOURCE}.txt"
                         sh "sed -n '/^Plan/p' ${TF_PLAN}.txt >> ${TF_APPLY_RESOURCE}.txt"
                         def apply = readFile(file: "${TF_APPLY_RESOURCE}.txt")
