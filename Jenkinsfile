@@ -40,27 +40,27 @@ pipeline {
             }
         }
 
-        stage('Git Clone & Update') {
-            steps {
-                checkout scm
-                sh 'git status'
+        // stage('Git Clone & Update') {
+        //     steps {
+        //         //checkout scm
+        //         sh 'git status'
 
-                script {
-                    fail_stage = "${STAGE_NAME}"
+        //         script {
+        //             fail_stage = "${STAGE_NAME}"
 
-                    if (env.BUILD_NUMBER == 1) {
-                        sh "git clone ${GIT_URL}"
-                    }
-                    else {
-                        dir("${GIT_REPO}"){
-                            sh 'git pull origin TF-v2'
-                        }
-                    }
-                }
-            }
-        }
+        //             if (env.BUILD_NUMBER == 1) {
+        //                 sh "git clone ${GIT_URL}"
+        //             }
+        //             else {
+        //                 dir("${GIT_REPO}"){
+        //                     sh 'git pull origin TF-v2'
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Setup Dirctory Path') {
+        stage('Setup Directory Path') {
             steps {
                 script {
                     echo ">>>>>>>>>>>>>>> RUN Stage Name: ${STAGE_NAME}"
@@ -121,7 +121,7 @@ pipeline {
                         def plan = readFile(file: "${TF_PLAN}.txt")
 
                         sh "sed -n '/created/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
-                        sh "sed -n '/update/p' ${TF_PLAN}.txt > ${TF_APPLY_RESOURCE}.txt"
+                        sh "sed -n '/update/p' ${TF_PLAN}.txt >> ${TF_APPLY_RESOURCE}.txt"
                         sh "sed -n '/destroyed/p' ${TF_PLAN}.txt >> ${TF_APPLY_RESOURCE}.txt"
                         sh "sed -n '/^Plan/p' ${TF_PLAN}.txt >> ${TF_APPLY_RESOURCE}.txt"
                         def apply = readFile(file: "${TF_APPLY_RESOURCE}.txt")
